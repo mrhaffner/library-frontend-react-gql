@@ -1,7 +1,7 @@
 import React from 'react'
 import AuthorForm from './AuthorForm'
 
-const Authors = ({ show, authors }) => {
+const Authors = ({ show, authors, setError }) => {
   if (!show) {
     return null
   }
@@ -29,7 +29,7 @@ const Authors = ({ show, authors }) => {
           )}
         </tbody>
       </table>
-      <AuthorForm authors={authors} />
+      <AuthorForm authors={authors} setError={setError} />
     </div>
   )
 }
