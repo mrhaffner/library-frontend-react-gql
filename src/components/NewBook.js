@@ -4,15 +4,12 @@ import { ADD_BOOK, ALL_AUTHORS, ALL_BOOKS } from '../queries'
 
 const NewBook = ({ show, setError }) => {
   const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
+  const [name, setName] = useState('')
   const [published, setPublished] = useState('')
   const [genre, setGenre] = useState('')
   const [genres, setGenres] = useState([])
 
   const [ addBook ] = useMutation(ADD_BOOK, {
-      onError: (error) => {
-      setError(error.graphQLErrors[0].message)
-    },
     refetchQueries: [ { query: ALL_BOOKS }, { query: ALL_AUTHORS } ]
   })
 
@@ -20,14 +17,14 @@ const NewBook = ({ show, setError }) => {
     return null
   }
 
-  const submit = async e => {
+  const submit = e => {
     e.preventDefault()
-    
-    addBook({ variables: { title, author, published, genres } })
+    const newBook = { title, name, published, genres }
+    addBook({ variables: newBook })
 
     setTitle('')
     setPublished('')
-    setAuthor('')
+    setName('')
     setGenres([])
     setGenre('')
   }
@@ -50,8 +47,8 @@ const NewBook = ({ show, setError }) => {
         <div>
           author
           <input
-            value={author}
-            onChange={({ target }) => setAuthor(target.value)}
+            value={name}
+            onChange={({ target }) => setName(target.value)}
           />
         </div>
         <div>

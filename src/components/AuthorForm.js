@@ -39,6 +39,7 @@ const AuthorForm = ({ authors }) => {
         <div>
           born <input
             value={born}
+            type='number'
             onChange={({ target }) => setBorn(Number(target.value))}
           />
         </div>

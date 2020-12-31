@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
@@ -11,6 +11,13 @@ const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  useEffect(() => {
+    const existingToken = localStorage.getItem('books-user-token')
+    if (existingToken) {
+      setToken(existingToken)
+    }
+  }, [])
 
   const authorResult = useQuery(ALL_AUTHORS)
   const bookResult = useQuery(ALL_BOOKS)
@@ -46,12 +53,14 @@ const App = () => {
           <button onClick={() => logout()}>logout</button> :
           <button onClick={() => setPage('login')}>login</button>
         }
+        <button onClick={() => console.log(token)}>token</button>
       </div>
 
       <Authors
         authors={authorResult.data.allAuthors}
         show={page === 'authors'}
         setError={notify}
+        token={token}
       />
 
       <Books

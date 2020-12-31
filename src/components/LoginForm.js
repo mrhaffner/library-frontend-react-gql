@@ -16,8 +16,7 @@ const LoginForm = ({ setError, setToken, show, setPage }) => {
     if ( result.data ) {
       const token = result.data.login.value
       setToken(token)
-      localStorage.setItem('phonenumbers-user-token', token)
-      setPage('authors')
+      localStorage.setItem('books-user-token', token)
     }
   }, [result.data]) // eslint-disable-line
 
@@ -29,6 +28,7 @@ const LoginForm = ({ setError, setToken, show, setPage }) => {
     event.preventDefault()
 
     login({ variables: { username, password } })
+    
   }
 
   return (
