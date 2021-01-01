@@ -4,8 +4,8 @@ import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Notify from './components/Notify'
-import { useQuery, useApolloClient, useLazyQuery } from '@apollo/client';
-import { ALL_AUTHORS, ALL_BOOKS, GET_BOOKS_BY_GENRE, GET_GENRE } from './queries'
+import { useQuery, useApolloClient, useLazyQuery, useSubscription } from '@apollo/client';
+import { ALL_AUTHORS, ALL_BOOKS, GET_BOOKS_BY_GENRE, GET_GENRE, BOOK_ADDED } from './queries'
 import Recommendations from './components/Recommendations'
 
 const App = () => {
@@ -13,6 +13,27 @@ const App = () => {
   const [token, setToken] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [getBooks, results] = useLazyQuery(GET_BOOKS_BY_GENRE)
+
+  const updateCacheWith = (addedBook) => {
+    const includedIn = (set, object) => 
+      set.map(p => p.id).includes(object.id)  
+
+    const dataInStore = client.readQuery({ query: ALL_BOOKS })
+    if (!includedIn(dataInStore.allBooks, addedBook)) {
+      client.writeQuery({
+        query: ALL_BOOKS,
+        data: { allBooks : dataInStore.allBooks.concat(addedBook) }
+      })
+    }   
+  }
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const addedBook = subscriptionData.data.bookAdded
+      notify(`${addedBook.title} added`)
+      updateCacheWith(addedBook)
+    }
+  })
 
   useEffect(() => {
     const existingToken = localStorage.getItem('books-user-token')
@@ -79,13 +100,16 @@ const App = () => {
       <NewBook
         show={page === 'add'}
         setError={notify}
+        updateCacheWith={updateCacheWith}
       />
 
-      <Recommendations 
-        show={page === 'recommend'}
-        booksResult={results}
-        genre={genreResult.data.me.favoriteGenre}
-      />
+      {genreResult.data.me &&
+        <Recommendations 
+          show={page === 'recommend'}
+          booksResult={results}
+          genre={genreResult.data.me.favoriteGenre}
+        />
+      }
 
       <LoginForm
         setToken={setToken}
