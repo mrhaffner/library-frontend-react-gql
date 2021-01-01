@@ -6,6 +6,7 @@ import LoginForm from './components/LoginForm'
 import Notify from './components/Notify'
 import { useQuery, useApolloClient } from '@apollo/client';
 import { ALL_AUTHORS, ALL_BOOKS } from './queries'
+import Recommendations from './components/Recommendations'
 
 const App = () => {
   const [page, setPage] = useState('authors')
@@ -49,11 +50,11 @@ const App = () => {
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
         {token && <button onClick={() => setPage('add')}>add book</button>}
+        {token && <button onClick={() => setPage('recommend')}>recommend</button>}
         {token ? 
           <button onClick={() => logout()}>logout</button> :
           <button onClick={() => setPage('login')}>login</button>
         }
-        <button onClick={() => console.log(token)}>token</button>
       </div>
 
       <Authors
@@ -71,6 +72,12 @@ const App = () => {
       <NewBook
         show={page === 'add'}
         setError={notify}
+      />
+
+      <Recommendations 
+        show={page === 'recommend'}
+        books={bookResult.data.allBooks}
+        
       />
 
       <LoginForm
