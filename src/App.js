@@ -4,14 +4,15 @@ import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Notify from './components/Notify'
-import { useQuery, useApolloClient } from '@apollo/client';
-import { ALL_AUTHORS, ALL_BOOKS } from './queries'
+import { useQuery, useApolloClient, useLazyQuery } from '@apollo/client';
+import { ALL_AUTHORS, ALL_BOOKS, GET_BOOKS_BY_GENRE, GET_GENRE } from './queries'
 import Recommendations from './components/Recommendations'
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [getBooks, results] = useLazyQuery(GET_BOOKS_BY_GENRE)
 
   useEffect(() => {
     const existingToken = localStorage.getItem('books-user-token')
@@ -22,6 +23,7 @@ const App = () => {
 
   const authorResult = useQuery(ALL_AUTHORS)
   const bookResult = useQuery(ALL_BOOKS)
+  const genreResult = useQuery(GET_GENRE)
   const client = useApolloClient()
 
   const logout = () => {
@@ -37,7 +39,12 @@ const App = () => {
     }, 5000)
   }
 
-  if (authorResult.loading || bookResult.loading)  {
+  const handleRecommendClick = () => {
+    getBooks({variables: {genre: genreResult.data.me.favoriteGenre}})
+    setPage('recommend')
+  }
+
+  if (authorResult.loading || bookResult.loading || genreResult.loading)  {
     return <div>loading...</div>
   }
 
@@ -50,7 +57,7 @@ const App = () => {
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
         {token && <button onClick={() => setPage('add')}>add book</button>}
-        {token && <button onClick={() => setPage('recommend')}>recommend</button>}
+        {token && <button onClick={() => handleRecommendClick()}>recommend</button>}
         {token ? 
           <button onClick={() => logout()}>logout</button> :
           <button onClick={() => setPage('login')}>login</button>
@@ -76,8 +83,8 @@ const App = () => {
 
       <Recommendations 
         show={page === 'recommend'}
-        books={bookResult.data.allBooks}
-        
+        booksResult={results}
+        genre={genreResult.data.me.favoriteGenre}
       />
 
       <LoginForm
